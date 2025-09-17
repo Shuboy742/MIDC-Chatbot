@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDC Land Bank AI Assistant</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-building"></i>
+                    <h1>MIDC Land Bank AI Assistant</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-secondary" id="clearChat">
+                        <i class="fas fa-trash"></i>
+                        Clear Chat
+                    </button>
+                    <button class="btn-primary" id="showSampleQuestions">
+                        <i class="fas fa-lightbulb"></i>
+                        Sample Questions
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Welcome Section -->
+            <div class="welcome-section" id="welcomeSection">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h2>Welcome to MIDC Land Bank Assistant</h2>
+                    <p>Ask me anything about land plots, industrial areas, property information, and more!</p>
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-search"></i>
+                            <span>Semantic Search</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Data Analysis</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Location Details</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container" id="chatContainer" style="display: none;">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Sample Questions Modal -->
+            <div class="modal" id="sampleQuestionsModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Sample Questions</h3>
+                        <button class="close-btn" id="closeModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="sample-questions" id="sampleQuestionsList">
+                            <!-- Sample questions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Ask about MIDC land plots, industrial areas, or property information..." autocomplete="off">
+                    <button id="sendButton" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-footer">
+                    <span class="typing-indicator" id="typingIndicator" style="display: none;">
+                        <i class="fas fa-circle"></i>
+                        <i class="fas fa-circle"></i>
+                        <i class="fas fa-circle"></i>
+                        AI is thinking...
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Initializing AI Assistant...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>

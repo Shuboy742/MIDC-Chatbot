@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDC Land Bank Assistant Widget</title>
+    <style>
+        /* MIDC Chatbot Widget Styles */
+        .midc-chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .midc-floating-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #0072c6 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .midc-floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .midc-chatbot-container {
+            width: 450px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .midc-chatbot-container.show {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .midc-chatbot-header {
+            background: linear-gradient(135deg, #0072c6 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .midc-chatbot-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .midc-chatbot-icon {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .midc-close-btn {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .midc-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .midc-header-close-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .midc-header-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .midc-chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .midc-message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+            line-height: 1.4;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .midc-message.assistant {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0072c6;
+            align-self: flex-start;
+            border-bottom-left-radius: 8px;
+        }
+
+        .midc-message.user {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 8px;
+        }
+
+        .midc-sample-questions {
+            display: flex;
+            gap: 12px;
+            padding: 15px 20px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .midc-sample-questions::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .midc-sample-questions::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .midc-sample-questions::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        .midc-sample-question {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            padding: 10px 18px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .midc-sample-question:hover {
+            background: #0072c6;
+            color: white;
+            border-color: #0072c6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(63, 115, 211, 0.959);
+        }
+
+        .midc-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .midc-message-input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .midc-message-input:focus {
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .midc-send-btn {
+            background: linear-gradient(135deg, #0072c6 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 14px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .midc-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.4);
+        }
+
+        .midc-send-btn:active {
+            transform: translateY(0);
+        }
+
+        .midc-typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-style: italic;
+            padding: 14px 18px;
+            background: #e3f2fd;
+            border-radius: 20px;
+            max-width: 85%;
+            align-self: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .midc-typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .midc-typing-dot {
+            width: 7px;
+            height: 7px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .midc-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .midc-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .midc-welcome-message {
+            text-align: center;
+            padding: 25px 20px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
+        .midc-welcome-message h3 {
+            color: #1e3c72;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .midc-welcome-message p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .midc-chatbot-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                bottom: 0;
+                right: 0;
+            }
+            
+            .midc-floating-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+        }
+
+        /* Hide scrollbar for webkit browsers */
+        .midc-chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .midc-chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .midc-chat-area::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .midc-chat-area::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- MIDC Chatbot Widget -->
+    <div class="midc-chatbot-widget">
+        <!-- Floating Button -->
+        <button class="midc-floating-btn" onclick="toggleMIDCChatbot()">
+            <img src="image/MIDC.jpg" alt="MIDC Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+        </button>
+
+        <!-- Chatbot Container -->
+        <div class="midc-chatbot-container" id="midcChatbotContainer">
+            <!-- Header -->
+            <div class="midc-chatbot-header">
+                <div class="midc-chatbot-title">
+                    <div class="midc-chatbot-icon">
+                        <img src="image/MIDC.jpg" alt="MIDC Logo" style="width: 24px; height: 24px; border-radius: 50%;">
+                    </div>
+                    MIDC Assistant
+                </div>
+                <button class="midc-header-close-btn" onclick="toggleMIDCChatbot()" title="Close Chat">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="midc-chat-area" id="midcChatArea">
+                
+                <div class="midc-welcome-message">
+                    <h3>👋 Welcome to MIDC Land Bank Assistant!</h3>
+                    <p>I'm here to help you find information about land plots, industrial areas, and property details. How can I assist you today?</p>
+                </div>
+            </div>
+
+            <!-- Sample Questions -->
+            <div class="midc-sample-questions">
+                <div class="midc-sample-question" onclick="askMIDCQuestion('What plots are available in Bhusaval?')">
+                    Plots in Bhusaval
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('Show me commercial plots in Pune')">
+                    Commercial plots in Pune
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('What are the cheapest industrial plots?')">
+                    Cheapest industrial plots
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('भुसावळ मध्ये औद्योगिक प्लॉट द्या')">
+                    भुसावळ मध्ये औद्योगिक प्लॉट
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('पुणे मध्ये कॉमर्शियल प्लॉट दाखवा')">
+                    पुणे मध्ये कॉमर्शियल प्लॉट
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('What plots are available in Mumbai?')">
+                    Plots in Mumbai
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('Show me residential plots')">
+                    Residential plots
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('What are the current rates?')">
+                    Current rates
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('सर्वात स्वस्त प्लॉट कोणते?')">
+                    सर्वात स्वस्त प्लॉट
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('Industrial areas in Maharashtra')">
+                    Industrial areas
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('RO Jalgaon plots available')">
+                    RO Jalgaon plots
+                </div>
+                <div class="midc-sample-question" onclick="askMIDCQuestion('मुंबई मध्ये कॉमर्शियल प्लॉट')">
+                    मुंबई मध्ये कॉमर्शियल प्लॉट
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="midc-input-area">
+                <input type="text" class="midc-message-input" id="midcMessageInput" placeholder="Ask your question..." onkeypress="handleMIDCKeyPress(event)">
+                <button class="midc-send-btn" onclick="sendMIDCMessage()">
+                    Send
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let isMIDCChatbotOpen = false;
+        let midcChatHistory = [];
+
+        // Toggle chatbot visibility
+        function toggleMIDCChatbot() {
+            console.log('Toggle button clicked! Current state:', isMIDCChatbotOpen);
+            const chatbot = document.getElementById('midcChatbotContainer');
+            const floatingBtn = document.querySelector('.midc-floating-btn');
+            
+            if (isMIDCChatbotOpen) {
+                console.log('Closing chatbot...');
+                console.log('Before close - chatbot classes:', chatbot.className);
+                console.log('Before close - floatingBtn display:', floatingBtn.style.display);
+                
+                // Clear chat history when closing
+                midcChatHistory = [];
+                const chatArea = document.getElementById('midcChatArea');
+                // Remove all message elements except the welcome message
+                const messages = chatArea.querySelectorAll('.midc-message');
+                messages.forEach(msg => msg.remove());
+                
+                // Clear backend memory
+                fetch('http://localhost:8000/api/clear-memory', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(response => {
+                    console.log('Backend memory cleared successfully');
+                }).catch(error => {
+                    console.log('Could not clear backend memory:', error);
+                });
+                
+                chatbot.classList.remove('show');
+                floatingBtn.style.display = 'flex';
+                isMIDCChatbotOpen = false;
+                
+                console.log('After close - chatbot classes:', chatbot.className);
+                console.log('After close - floatingBtn display:', floatingBtn.style.display);
+                console.log('Chatbot closed');
+            } else {
+                console.log('Opening chatbot...');
+                console.log('Before open - chatbot classes:', chatbot.className);
+                console.log('Before open - floatingBtn display:', floatingBtn.style.display);
+                
+                chatbot.classList.add('show');
+                floatingBtn.style.display = 'none';
+                isMIDCChatbotOpen = true;
+                document.getElementById('midcMessageInput').focus();
+                
+                console.log('After open - chatbot classes:', chatbot.className);
+                console.log('After open - floatingBtn display:', floatingBtn.style.display);
+                
+                // Add welcome message when opening
+                setTimeout(() => {
+                    addMIDCMessage("👋 Hi! I'm your MIDC Land Bank Assistant. How can I help you today?", 'assistant');
+                }, 500);
+                console.log('Chatbot opened');
+            }
+        }
+
+        // Handle Enter key press
+        function handleMIDCKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMIDCMessage();
+            }
+        }
+
+        // Send message function
+        async function sendMIDCMessage() {
+            const input = document.getElementById('midcMessageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMIDCMessage(message, 'user');
+                input.value = '';
+                
+                // Show typing indicator
+                showMIDCTypingIndicator();
+                
+                // Call the real API and hide typing indicator when done
+                try {
+                    await generateMIDCResponse(message);
+                } catch (error) {
+                    console.error('Error in sendMIDCMessage:', error);
+                    addMIDCMessage("I'm sorry, I'm having trouble connecting to the database right now. Please try again in a moment, or contact support if the issue persists.", 'assistant');
+                } finally {
+                    hideMIDCTypingIndicator();
+                }
+            }
+        }
+
+        // Ask question from sample questions
+        async function askMIDCQuestion(question) {
+            addMIDCMessage(question, 'user');
+            showMIDCTypingIndicator();
+            
+            try {
+                await generateMIDCResponse(question);
+            } catch (error) {
+                console.error('Error in askMIDCQuestion:', error);
+                addMIDCMessage("I'm sorry, I'm having trouble connecting to the database right now. Please try again in a moment, or contact support if the issue persists.", 'assistant');
+            } finally {
+                hideMIDCTypingIndicator();
+            }
+        }
+
+        // Add message to chat
+        function addMIDCMessage(message, sender) {
+            const chatArea = document.getElementById('midcChatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `midc-message ${sender}`;
+            messageDiv.textContent = message;
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Store in chat history
+            midcChatHistory.push({ message, sender, timestamp: new Date() });
+        }
+
+        // Show typing indicator
+        function showMIDCTypingIndicator() {
+            const chatArea = document.getElementById('midcChatArea');
+            
+            // Create typing indicator element
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'midc-typing-indicator';
+            typingDiv.id = 'midcTypingIndicator';
+            typingDiv.innerHTML = `
+                <span>Bot is thinking</span>
+                <div class="midc-typing-dots">
+                    <div class="midc-typing-dot"></div>
+                    <div class="midc-typing-dot"></div>
+                    <div class="midc-typing-dot"></div>
+                </div>
+            `;
+            
+            // Add to chat area
+            chatArea.appendChild(typingDiv);
+            
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideMIDCTypingIndicator() {
+            const typingIndicator = document.getElementById('midcTypingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Generate AI response from backend RAG model
+        async function generateMIDCResponse(userMessage) {
+            // Call your FastAPI backend
+            const response = await fetch('http://localhost:8000/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    message: userMessage,
+                    chat_history: midcChatHistory.map(h => h.message)
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Add the response from your RAG model
+            addMIDCMessage(data.answer, 'assistant');
+            
+            // Log for debugging
+            console.log('Backend response:', data);
+        }
+
+        // Initialize chatbot
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chat will be initialized when user opens it
+            console.log('Page loaded - Initial state:', isMIDCChatbotOpen);
+            const chatbot = document.getElementById('midcChatbotContainer');
+            const floatingBtn = document.querySelector('.midc-floating-btn');
+            console.log('Initial chatbot classes:', chatbot.className);
+            console.log('Initial floatingBtn display:', floatingBtn.style.display);
+        });
+    </script>
+</body>
+</html>
